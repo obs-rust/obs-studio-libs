@@ -68,9 +68,12 @@ mbedtls() {
     cmake_build -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DUSE_SHARED_MBEDTLS_LIBRARY=ON \
         -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DGEN_FILES=OFF
 }
+# libsrt 1.5.7, ahead of obs-deps' 1.5.2: releases before it have public advisories
+# (GHSA-6xg9-784j-24rm, GHSA-4mc6-qmpp-g7gw, GHSA-m96h-3rc9-xx6h). It keeps the
+# libsrt.so.1.5 soname and ABI; FFmpeg and OBS's SRT output share this one copy.
 srt() {
-    tar_src srt https://github.com/Haivision/srt/archive/v1.5.2.tar.gz \
-        463970a3f575446b3f55abb6f323d5476c963c77b3c975cd902e9c87cdd9a92c
+    tar_src srt https://github.com/Haivision/srt/archive/v1.5.7.tar.gz \
+        017cd1e437ef2073a4dd10ddf7b55e86bc3d6ebac0393d13bd22f6a57055d32b
     cmake_build -DENABLE_APPS=OFF -DENABLE_STATIC=OFF -DENABLE_SHARED=ON -DUSE_ENCLIB=mbedtls \
         -DMBEDTLS_PREFIX="$PREFIX"
 }
