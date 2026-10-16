@@ -1,0 +1,39 @@
+{
+  "$schema": "https://zackees.github.io/manifest.json/v1/manifest.schema.json",
+  "kind": "Catalog",
+  "schema_version": 1,
+  "tool": "glib",
+  "online_url": "https://raw.githubusercontent.com/obs-rust/obs-studio-libs/assets/glib/manifest.json",
+  "channels": {
+    "latest-stable": "2.80.5",
+    "stable": "2.80.5"
+  },
+  "releases": [
+    {
+      "version": "2.80.5",
+      "published_at": "2026-10-16T04:39:52Z",
+      "platforms": [
+        {
+          "platform": {
+            "os": "linux",
+            "arch": "x86_64",
+            "os_version": "2.28",
+            "libc": "glibc"
+          },
+          "variant": {
+            "optimization": "release"
+          },
+          "asset": {
+            "filename": "glib-2.80.5-linux-x86_64-glibc2.28-release.tar.zst",
+            "media_type": "application/zstd",
+            "size_bytes": 2921840,
+            "sha256": "436ba443e4c7b05ea9f0f70ba3408fd04833f086a3beff5715e0df163e212fa9",
+            "urls": [
+              "https://github.com/obs-rust/obs-studio-libs/releases/download/glib-2.80.5/glib-2.80.5-linux-x86_64-glibc2.28-release.tar.zst"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

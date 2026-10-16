@@ -3,6 +3,66 @@
   "kind": "Index",
   "schema_version": 1,
   "tools": {
+    "fdk-aac": {
+      "descriptor": {
+        "url": "fdk-aac/manifest.json",
+        "sha256": "4ff0c0148a52d4edec98faa815ece89ec429d5b08767455e14988fb168941574",
+        "size_bytes": 1177,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "Fraunhofer FDK AAC encoder (obs-libfdk).",
+      "kind_hint": "library"
+    },
+    "ffmpeg": {
+      "descriptor": {
+        "url": "ffmpeg/manifest.json",
+        "sha256": "14d3bab2123c7ccfaee213f4b07379e7c1b9053b359c122bf55e7594160a333f",
+        "size_bytes": 1173,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "FFmpeg with the codecs OBS ships (x264, aom, svt-av1, vpx, opus, vorbis, theora, lame, srt, librist, mbedtls, nv-codec headers): shared libraries and headers.",
+      "kind_hint": "library"
+    },
+    "glib": {
+      "descriptor": {
+        "url": "glib/manifest.json",
+        "sha256": "f0d403545e75faf22c9f97fc3f01430247d0e61a95e10dd7114bba1b020e1589",
+        "size_bytes": 1168,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "GLib/GIO, for OBS's PipeWire capture (needs >= 2.76).",
+      "kind_hint": "library"
+    },
+    "headers": {
+      "descriptor": {
+        "url": "headers/manifest.json",
+        "sha256": "d3d4d3a7afca2b36df145ee309146ffba5d09cf2e5222a435c788bccd550b49d",
+        "size_bytes": 1207,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "Header-only libraries: nlohmann/json, asio, SIMDe.",
+      "kind_hint": "library"
+    },
+    "pipewire": {
+      "descriptor": {
+        "url": "pipewire/manifest.json",
+        "sha256": "79aaddb5f9e7a6b038eb5789d565a6eb817aebbf4fd0bee32487a3d339c5d238",
+        "size_bytes": 1182,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "PipeWire client library, modules, SPA plugins and client.conf.",
+      "kind_hint": "library"
+    },
+    "qrcodegen": {
+      "descriptor": {
+        "url": "qrcodegen/manifest.json",
+        "sha256": "045236e7a115a6b053da600e7a1ccd11bf05d8e951f66bb059e46970db2159a8",
+        "size_bytes": 1185,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "nayuki QR-Code-generator (C++), for obs-websocket.",
+      "kind_hint": "library"
+    },
     "qt6": {
       "descriptor": {
         "url": "qt6/manifest.json",
