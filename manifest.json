@@ -3,6 +3,16 @@
   "kind": "Index",
   "schema_version": 1,
   "tools": {
+    "appimagetool": {
+      "descriptor": {
+        "url": "appimagetool/manifest.json",
+        "sha256": "1aebd2725b6cceeb4c48647e02baeecc7c6271c468bcf3466f505be053fd4ef5",
+        "size_bytes": 1055,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "appimagetool (AppImage/appimagetool), the AppImage packer the obs-studio build runs.",
+      "kind_hint": "library"
+    },
     "fdk-aac": {
       "descriptor": {
         "url": "fdk-aac/manifest.json",
@@ -43,6 +53,16 @@
       "summary": "Header-only libraries: nlohmann/json, asio, SIMDe.",
       "kind_hint": "library"
     },
+    "implib": {
+      "descriptor": {
+        "url": "implib/manifest.json",
+        "sha256": "962bc9d9c77f1a59facf5c6faf0dfeda51f71c50ad48783fd6b297ec6393ff8f",
+        "size_bytes": 1040,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "Implib.so (yugr/Implib.so): generates the lazy-loading shims for optional host libraries (#959).",
+      "kind_hint": "library"
+    },
     "pipewire": {
       "descriptor": {
         "url": "pipewire/manifest.json",
@@ -71,6 +91,16 @@
         "media_type": "application/vnd.manifest.v1+json"
       },
       "summary": "Qt 6 (qtbase, qtsvg, qtwayland on Linux): shared libraries, headers, CMake packages and plugins for building OBS-Studio-Rust.",
+      "kind_hint": "library"
+    },
+    "uv": {
+      "descriptor": {
+        "url": "uv/manifest.json",
+        "sha256": "ec3a59eb62baa0f29aa12e52199760bccf9208fe0c52549b95306d2329b166d6",
+        "size_bytes": 1017,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "uv (astral-sh/uv), the Python runner the obs-studio build scripts use.",
       "kind_hint": "library"
     }
   }

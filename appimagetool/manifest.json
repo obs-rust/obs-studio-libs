@@ -1,0 +1,35 @@
+{
+  "$schema": "https://zackees.github.io/manifest.json/v1/manifest.schema.json",
+  "kind": "Catalog",
+  "schema_version": 1,
+  "tool": "appimagetool",
+  "online_url": "https://raw.githubusercontent.com/obs-rust/obs-studio-libs/assets/appimagetool/manifest.json",
+  "channels": {
+    "latest-stable": "1.9.1",
+    "stable": "1.9.1"
+  },
+  "releases": [
+    {
+      "version": "1.9.1",
+      "published_at": "2026-10-16T06:25:39Z",
+      "platforms": [
+        {
+          "platform": {
+            "os": "linux",
+            "arch": "x86_64"
+          },
+          "variant": {},
+          "asset": {
+            "filename": "appimagetool-1.9.1-linux-x86_64.tar.zst",
+            "media_type": "application/zstd",
+            "size_bytes": 14588917,
+            "sha256": "13886a4cb2ffd510de61e8963d46c1439c533554777f75246d890a2651e92267",
+            "urls": [
+              "https://github.com/obs-rust/obs-studio-libs/releases/download/appimagetool-1.9.1/appimagetool-1.9.1-linux-x86_64.tar.zst"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

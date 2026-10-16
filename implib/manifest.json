@@ -1,0 +1,35 @@
+{
+  "$schema": "https://zackees.github.io/manifest.json/v1/manifest.schema.json",
+  "kind": "Catalog",
+  "schema_version": 1,
+  "tool": "implib",
+  "online_url": "https://raw.githubusercontent.com/obs-rust/obs-studio-libs/assets/implib/manifest.json",
+  "channels": {
+    "latest-stable": "a3e167cf",
+    "stable": "a3e167cf"
+  },
+  "releases": [
+    {
+      "version": "a3e167cf",
+      "published_at": "2026-10-16T06:25:39Z",
+      "platforms": [
+        {
+          "platform": {
+            "os": "linux",
+            "arch": "x86_64"
+          },
+          "variant": {},
+          "asset": {
+            "filename": "implib-a3e167cf-linux-x86_64.tar.zst",
+            "media_type": "application/zstd",
+            "size_bytes": 39866,
+            "sha256": "b5dd0afff9b10ce08c60ce3f0811c0b682ceb44be5465fff6e7ecf0246fe7abb",
+            "urls": [
+              "https://github.com/obs-rust/obs-studio-libs/releases/download/implib-a3e167cf/implib-a3e167cf-linux-x86_64.tar.zst"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
