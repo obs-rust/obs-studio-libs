@@ -63,8 +63,13 @@ lame() {
     sed -i '/lame_init_old/d' include/libmp3lame.sym
     autotools --disable-frontend --disable-decoder --disable-gtktest
 }
+# Mbed TLS 3.6.7, ahead of obs-deps' 3.6.4: releases before it have public advisories
+# (CVE-2026-49300, X.509 basicConstraints CA-bit forgery, among others). The release
+# tarball is the mbedtls-3.6.7 tag's tree (068ff080) with its framework submodule.
+# libsrt and librist link it from this prefix, and so does OBS's RTMPS output.
 mbedtls() {
-    git_src mbedtls https://github.com/Mbed-TLS/mbedtls.git c765c831e5c2a0971410692f92f7a81d6ec65ec2
+    tar_src mbedtls https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2 \
+        a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6
     cmake_build -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DUSE_SHARED_MBEDTLS_LIBRARY=ON \
         -DUSE_STATIC_MBEDTLS_LIBRARY=OFF -DGEN_FILES=OFF
 }
