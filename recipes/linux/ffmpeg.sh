@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# ffmpeg 8.1.2 for os=linux,arch=x86_64,libc=glibc,os_version=2.28 (obs-studio-libs).
+# ffmpeg 8.1.3 for os=linux,arch=x86_64,libc=glibc,os_version=2.28 (obs-studio-libs).
 # FFmpeg and the codecs it links, with obs-deps' pins (deps.ffmpeg/): one artifact, because
 # FFmpeg is built against these exact codec builds.
 PREFIX=/opt/obs-deps/ffmpeg
-VERSION=8.1.2
+VERSION=8.1.3
 # shellcheck source=common.sh
 . "$(dirname "$0")/common.sh"
 
@@ -88,10 +88,11 @@ nvcodec() {
     make PREFIX="$PREFIX" install
 }
 ffmpeg() {
-    git_src ffmpeg https://github.com/FFmpeg/FFmpeg.git 38b88335f99e76ed89ff3c93f877fdefce736c13
-    # A shallow checkout has no tags, so version.sh would name the build after the
-    # commit; OBS's FindFFmpeg needs the release number (>= 8.0).
-    echo 8.1.2 >VERSION
+    # FFmpeg 8.1.3, ahead of obs-deps' 8.1.2: 8.1.2 has public CVEs in decoders and
+    # demuxers. The release tarball is the n8.1.3 tag's tree (1041abdc) plus a VERSION
+    # file holding 8.1.3, the release number OBS's FindFFmpeg needs (>= 8.0).
+    tar_src ffmpeg https://ffmpeg.org/releases/ffmpeg-8.1.3.tar.xz \
+        7138d28c96d9d3e3af4ee3d8cad72741f8ffb40da90c1112235dea3ecd3178a3
     # lame has no pkg-config file: FFmpeg finds it (and the others) by path.
     ./configure --prefix="$PREFIX" --enable-shared --disable-static --enable-pic \
         --extra-cflags="-I$PREFIX/include" --extra-ldflags="-L$PREFIX/lib -Wl,-rpath-link,$PREFIX/lib" \
