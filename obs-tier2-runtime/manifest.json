@@ -1,0 +1,37 @@
+{
+  "$schema": "https://zackees.github.io/manifest.json/v1/manifest.schema.json",
+  "kind": "Catalog",
+  "schema_version": 1,
+  "tool": "obs-tier2-runtime",
+  "online_url": "https://raw.githubusercontent.com/obs-rust/obs-studio-libs/assets/obs-tier2-runtime/manifest.json",
+  "channels": {
+    "latest-stable": "0.1.0-ci.20261022.ee148335",
+    "stable": "0.1.0-ci.20261022.ee148335"
+  },
+  "releases": [
+    {
+      "version": "0.1.0-ci.20261022.ee148335",
+      "published_at": "2026-10-22T05:05:14Z",
+      "platforms": [
+        {
+          "platform": {
+            "os": "linux",
+            "arch": "x86_64"
+          },
+          "variant": {
+            "flavor": "ubuntu26.04-docker"
+          },
+          "asset": {
+            "filename": "obs-tier2-runtime-0.1.0-ci.20261022.ee148335-linux-x86_64-ubuntu26.04-docker.tar.zst",
+            "media_type": "application/zstd",
+            "size_bytes": 493631934,
+            "sha256": "5e5102bfb16ef6d9bec4d24fbe3ee3bafa7abb5f565ad7c7308320cf4df5a558",
+            "urls": [
+              "https://github.com/obs-rust/obs-studio-libs/releases/download/obs-tier2-runtime-0.1.0-ci.20261022.ee148335/obs-tier2-runtime-0.1.0-ci.20261022.ee148335-linux-x86_64-ubuntu26.04-docker.tar.zst"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
