@@ -25,3 +25,8 @@ out = { source = "out", destination = "/opt/obs-deps" }
 [task.linux]
 stack = "linux"
 cmd = "recipes/linux/build.sh"
+
+# One tool:  bosn run --task libdatachannel
+[task.libdatachannel]
+stack = "linux"
+cmd = "recipes/linux/build.sh libdatachannel"
