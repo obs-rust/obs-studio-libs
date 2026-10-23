@@ -72,6 +72,15 @@
       },
       "kind_hint": "library"
     },
+    "libvpl": {
+      "descriptor": {
+        "url": "libvpl/manifest.json",
+        "sha256": "b37369337e5bf01ac705baa3ed8de808fac49c6e0c65aaf0fa4577bf4ca0b719",
+        "size_bytes": 1177,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "kind_hint": "library"
+    },
     "obs-tier2-runtime": {
       "descriptor": {
         "url": "obs-tier2-runtime/manifest.json",
