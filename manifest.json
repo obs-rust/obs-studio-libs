@@ -63,6 +63,15 @@
       "summary": "Implib.so (yugr/Implib.so): generates the lazy-loading shims for optional host libraries (#959).",
       "kind_hint": "library"
     },
+    "libdatachannel": {
+      "descriptor": {
+        "url": "libdatachannel/manifest.json",
+        "sha256": "76a6912d172e105d4af73c95a72c9dcda4ab6bcd04d0a9ed46f4309e709a6c86",
+        "size_bytes": 1218,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "kind_hint": "library"
+    },
     "obs-tier2-runtime": {
       "descriptor": {
         "url": "obs-tier2-runtime/manifest.json",
