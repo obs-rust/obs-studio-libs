@@ -25,3 +25,28 @@ out = { source = "out", destination = "/opt/obs-deps" }
 [task.linux]
 stack = "linux"
 cmd = "recipes/linux/build.sh"
+
+# CEF for obs-browser (obs-rust/obs-studio#1864): a Chromium build, so its own
+# Ubuntu image, and its checkout and build under the host's out/cef (~150 GB).
+# Run in order; re-run build until it finishes (bosn caps a run at 4 h):
+#   bosn run --task cef-linux-sync / cef-linux-build / cef-linux-pack
+[stack.cef-linux]
+dockerfile = "recipes/cef/linux/Dockerfile"
+family = "obs-studio-libs-cef-linux"
+workdir = "/src"
+
+[stack.cef-linux.mounts]
+src = { source = ".", destination = "/src" }
+cef = { source = "out/cef", destination = "/cef" }
+
+[task.cef-linux-sync]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh sync"
+
+[task.cef-linux-build]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh build"
+
+[task.cef-linux-pack]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh pack"
