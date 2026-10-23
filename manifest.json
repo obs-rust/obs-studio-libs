@@ -26,8 +26,8 @@
     "ffmpeg": {
       "descriptor": {
         "url": "ffmpeg/manifest.json",
-        "sha256": "a60053318d94ee065a09542c7710acb11c694fe3538dc13bf38011a99c13acce",
-        "size_bytes": 2669,
+        "sha256": "ea67e5a1e83824467ab74d507f894e53ad786d9ad659dbb1e6c013aa56ead1e1",
+        "size_bytes": 3496,
         "media_type": "application/vnd.manifest.v1+json"
       },
       "summary": "FFmpeg with the codecs OBS ships (x264, aom, svt-av1, vpx, opus, vorbis, theora, lame, srt, librist, mbedtls, nv-codec headers): shared libraries and headers.",
