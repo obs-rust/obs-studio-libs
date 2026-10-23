@@ -9,7 +9,7 @@ cd "$(dirname "$0")/../.."
 [ "$(getconf GNU_LIBC_VERSION)" = "glibc 2.28" ] ||
     { echo "error: $(getconf GNU_LIBC_VERSION), expected exactly glibc 2.28" >&2; exit 1; }
 
-all=(headers qrcodegen fdk-aac glib pipewire ffmpeg qt6 libdatachannel)
+all=(headers qrcodegen fdk-aac glib pipewire ffmpeg qt6 libdatachannel libvpl)
 tools=("$@")
 [ "${#tools[@]}" -gt 0 ] || tools=("${all[@]}")
 
