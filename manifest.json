@@ -123,8 +123,8 @@
     "uv": {
       "descriptor": {
         "url": "uv/manifest.json",
-        "sha256": "ec3a59eb62baa0f29aa12e52199760bccf9208fe0c52549b95306d2329b166d6",
-        "size_bytes": 1017,
+        "sha256": "b9af40c709d3da9fc9f14f3b5db2462d25b50e6fea06cde71b56a62a03559817",
+        "size_bytes": 1686,
         "media_type": "application/vnd.manifest.v1+json"
       },
       "summary": "uv (astral-sh/uv), the Python runner the obs-studio build scripts use.",
