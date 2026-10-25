@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 from . import catalog as cat
-from .fetch import Pin, install
+from .fetch import Pin, install_all
 from .model import ManifestError, Platform, Variant, dumps, parse_lock, parse_record, parse_summaries
 from .pack import ingest, pack
 
@@ -87,11 +87,9 @@ def main(argv: list[str] | None = None) -> int:
             print(f"{args.output}: {sl.asset.filename}")
         elif args.cmd == "fetch":
             lock = parse_lock(args.lock.read_bytes(), str(args.lock))
-            for locked in lock.tools:
-                if args.only and locked.tool not in args.only:
-                    continue
-                pin = Pin(locked.tool, locked.version, locked.platform, locked.variant, locked.sha256)
-                asset = install(pin, Path(locked.install), lock.root)
+            chosen = [t for t in lock.tools if not args.only or t.tool in args.only]
+            jobs = [(Pin(t.tool, t.version, t.platform, t.variant, t.sha256), Path(t.install)) for t in chosen]
+            for locked, asset in zip(chosen, install_all(jobs, lock.root), strict=True):
                 print(f"{asset.filename} -> {locked.install}")
     except ManifestError as e:
         print(f"obs-studio-libs: {e}", file=sys.stderr)

@@ -11,13 +11,15 @@ import hashlib
 import shutil
 import tarfile
 import tempfile
+import time
 import urllib.parse
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 
 from .catalog import ASSETS_RAW, resolve
-from .model import Asset, ManifestError, Platform, Variant, parse_index
+from .model import Asset, Index, ManifestError, Platform, Variant, parse_index
 
 ROOT_URL = f"{ASSETS_RAW}/manifest.json"
 ALLOWED_HOSTS = frozenset(
@@ -41,9 +43,29 @@ class _CheckedRedirects(urllib.request.HTTPRedirectHandler):
 _OPENER = urllib.request.build_opener(_CheckedRedirects)
 
 
+ATTEMPTS = 3
+BACKOFF = (1, 4)  # seconds before attempt 2 and 3
+WORKERS = 4
+_sleep = time.sleep
+
+
+def _retry(url: str, fn):
+    """fn(response) for url, retried with exponential backoff on OSError."""
+    for attempt in range(ATTEMPTS):
+        try:
+            with _OPENER.open(check_url(url), timeout=60) as r:
+                return fn(r)
+        except OSError:
+            if attempt + 1 == ATTEMPTS:
+                raise
+            _sleep(BACKOFF[attempt])
+
+
 def get(url: str) -> bytes:
-    with _OPENER.open(check_url(url), timeout=60) as r:
-        return r.read()
+    try:
+        return _retry(url, lambda r: r.read())
+    except OSError as e:
+        raise ManifestError(f"could not download {url}: {e}") from e
 
 
 @dataclass(frozen=True)
@@ -57,8 +79,10 @@ class Pin:
     sha256: str
 
 
-def install(pin: Pin, dest: Path, root_url: str = ROOT_URL) -> Asset:
-    index = parse_index(get(root_url), root_url)
+def install(pin: Pin, dest: Path, root_url: str = ROOT_URL, index: Index | None = None) -> Asset:
+    """Install one pinned asset; pass index to reuse a root manifest already parsed."""
+    if index is None:
+        index = parse_index(get(root_url), root_url)
     asset = resolve(
         index,
         pin.tool,
@@ -75,8 +99,8 @@ def install(pin: Pin, dest: Path, root_url: str = ROOT_URL) -> Asset:
         errors = []
         for url in asset.urls:
             try:
-                with _OPENER.open(check_url(url), timeout=60) as r, archive.open("wb") as f:
-                    shutil.copyfileobj(r, f, 1 << 20)
+                with archive.open("wb") as f:
+                    _retry(url, lambda r, f=f: (f.seek(0), f.truncate(), shutil.copyfileobj(r, f, 1 << 20)))
                 break
             except OSError as e:
                 errors.append(f"{url}: {e}")
@@ -92,3 +116,13 @@ def install(pin: Pin, dest: Path, root_url: str = ROOT_URL) -> Asset:
         with tarfile.open(archive, "r:zst") as tar:
             tar.extractall(dest, filter="tar")
     return asset
+
+
+def install_all(jobs: list[tuple[Pin, Path]], root_url: str = ROOT_URL, workers: int = WORKERS) -> list[Asset]:
+    """Fetch the root manifest once, then download, verify and extract each pin in a bounded pool.
+
+    Destinations must be disjoint. Returns the assets in the order of jobs."""
+    index = parse_index(get(root_url), root_url)
+    with ThreadPoolExecutor(max_workers=max(1, min(workers, len(jobs)))) as pool:
+        futures = [pool.submit(install, pin, dest, root_url, index) for pin, dest in jobs]
+        return [f.result() for f in futures]
