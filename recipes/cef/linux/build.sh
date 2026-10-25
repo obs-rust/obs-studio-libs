@@ -18,7 +18,7 @@ NAME="cef_binary_${VERSION}_linux_x86_64"
 # The automate script of exactly this branch.
 AUTOMATE_URL="https://raw.githubusercontent.com/chromiumembedded/cef/${BRANCH}/tools/automate/automate-git.py"
 
-export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_sysroot=true symbol_level=0 chrome_pgo_phase=0"
+export GN_DEFINES="is_official_build=true proprietary_codecs=true ffmpeg_branding=Chrome use_sysroot=true symbol_level=1 chrome_pgo_phase=0"
 export CEF_ARCHIVE_FORMAT=tar.bz2
 export DEPOT_TOOLS_UPDATE=0
 
