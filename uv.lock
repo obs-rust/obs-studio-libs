@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14"
 
 [[package]]
@@ -70,22 +70,24 @@ name = "obs-studio-libs"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "manifest-json" },
     { name = "pyelftools" },
 ]
 
 [package.dev-dependencies]
 dev = [
-    { name = "manifest-json" },
     { name = "pytest" },
     { name = "ruff" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyelftools", specifier = "==0.32" }]
+requires-dist = [
+    { name = "manifest-json", git = "https://github.com/zackees/manifest.json?rev=e255ede6edf4a646a6d1031e91fd57136105a899" },
+    { name = "pyelftools", specifier = "==0.32" },
+]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "manifest-json", git = "https://github.com/zackees/manifest.json?rev=e255ede6edf4a646a6d1031e91fd57136105a899" },
     { name = "pytest", specifier = "==8.4.2" },
     { name = "ruff", specifier = "==0.14.3" },
 ]

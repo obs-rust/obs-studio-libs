@@ -130,7 +130,7 @@ def test_a_rebuild_sits_beside_the_original_and_pins_pick_one(tmp_path):
     old = cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch, first.entry.asset.sha256)
     new = cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch, rebuilt.entry.asset.sha256)
     assert (old, new) == (first.entry.asset, rebuilt.entry.asset)
-    with pytest.raises(ManifestError, match="2 entries"):
+    with pytest.raises(ManifestError, match="2 candidates matched"):
         cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch)
 
 

@@ -4,7 +4,10 @@ version = "0.1.0"
 description = "Pack, ingest and catalog OBS-Studio-Rust's prebuilt dependencies (zackees/manifest.json)"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = ["pyelftools==0.32"]
+dependencies = [
+  "pyelftools==0.32",
+  "manifest-json @ git+https://github.com/zackees/manifest.json@e255ede6edf4a646a6d1031e91fd57136105a899",
+]
 
 [project.scripts]
 obs-studio-libs = "obs_studio_libs.cli:main"
@@ -13,7 +16,6 @@ obs-studio-libs = "obs_studio_libs.cli:main"
 dev = [
   "pytest==8.4.2",
   "ruff==0.14.3",
-  "manifest-json @ git+https://github.com/zackees/manifest.json@e255ede6edf4a646a6d1031e91fd57136105a899",
 ]
 
 [build-system]

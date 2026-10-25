@@ -24,6 +24,7 @@ from .model import (
     dumps,
     parse_catalog,
     parse_index,
+    pick_platform,
 )
 
 REPO = "obs-rust/obs-studio-libs"
@@ -164,12 +165,10 @@ def resolve(
     release = catalog.release(version)
     if release is None:
         raise ManifestError(f"{tool} {version}: no such release")
-    hits = [p for p in release.platforms if p.platform.matches(platform) and p.variant.matches(variant)]
-    # Several builds of a version can match (a rebuild under a build label beside the
-    # original): the pinned bytes decide.
+    # Several builds of a version can share a platform (a rebuild under a build label
+    # beside the original): the pinned bytes decide, before manifest.json's resolver.
     if sha256:
-        hits = [p for p in hits if p.asset.sha256 == sha256]
-    if len(hits) != 1:
-        pinned = f" with sha256 {sha256}" if sha256 else ""
-        raise ManifestError(f"{tool} {release.version}: {len(hits)} entries match {platform} {variant}{pinned}")
-    return hits[0].asset
+        release = Release(
+            release.version, release.published_at, tuple(p for p in release.platforms if p.asset.sha256 == sha256)
+        )
+    return pick_platform(tool, release, platform, variant).asset

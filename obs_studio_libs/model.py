@@ -19,6 +19,8 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+from manifest_json import ResolveError, resolve_in_catalog
+
 SCHEMA = "https://zackees.github.io/manifest.json/v1/manifest.schema.json"
 MANIFEST_MEDIA_TYPE = "application/vnd.manifest.v1+json"
 
@@ -527,3 +529,14 @@ def parse_record(text: str | bytes, where: str = "record") -> PackRecord:
 
 def dumps(value: Index | Catalog | EmbeddedSlice | ReleasePlatform | PackRecord) -> str:
     return json.dumps(value.to_json(), indent=2) + "\n"
+
+
+def pick_platform(tool: str, release: Release, platform: Platform, variant: Variant) -> ReleasePlatform:
+    """The one entry of release for platform and variant, by manifest.json's own resolver
+    (arch aliases, wildcards, specificity, ambiguity), as soldr-toolchain resolves."""
+    doc = Catalog(tool, "", (("pinned", release.version),), (release,)).to_json()
+    try:
+        got = resolve_in_catalog(doc, tool, platform.to_json(), "pinned", variant.to_json())
+    except ResolveError as e:
+        raise ManifestError(f"{tool} {release.version}: {platform} {variant}: {e}") from e
+    return next(p for p in release.platforms if p.asset.to_json() == got)
