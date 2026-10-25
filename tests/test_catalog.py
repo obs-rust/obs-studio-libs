@@ -173,3 +173,9 @@ def test_a_universal2_mac_build_serves_arm64(tmp_path):
     index, fetch, (rec,) = _published(tmp_path, Platform.from_spec("os=darwin,arch=universal2,os_version=11.0"))
     got = cat.resolve(index, "demo", "1.0", Platform.from_spec("os=darwin,arch=arm64"), NONE, fetch)
     assert got == rec.entry.asset
+
+
+def test_slice_resolves_as_fetch_does(tmp_path):
+    _, _, (rec,) = _published(tmp_path, Platform.from_spec("os=darwin,arch=universal2,os_version=11.0"))
+    sl = cat.make_slice(tmp_path / "assets", "demo", "1.0", Platform.from_spec("os=darwin,arch=arm64"), NONE)
+    assert sl.asset == rec.entry.asset
