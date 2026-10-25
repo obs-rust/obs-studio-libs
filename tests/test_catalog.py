@@ -132,3 +132,44 @@ def test_a_rebuild_sits_beside_the_original_and_pins_pick_one(tmp_path):
     assert (old, new) == (first.entry.asset, rebuilt.entry.asset)
     with pytest.raises(ManifestError, match="2 entries"):
         cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch)
+
+
+def _published(tmp_path, *platforms):
+    """Pack one demo 1.0 build per platform into one catalog; returns (index, fetch, records)."""
+    records = []
+    for n, platform in enumerate(platforms):
+        src = tree(tmp_path / f"t{n}", f"build {n}")
+        records.append(pack(src, "demo", "1.0", platform, NONE, tmp_path / f"d{n}"))
+    assets = tmp_path / "assets"
+    assets.mkdir()
+    catalog = cat.empty_catalog("demo")
+    for rec in records:
+        catalog = cat.add_platform(catalog, "1.0", rec.entry)
+    cat.write_catalog(assets, catalog)
+    index = cat.write_index(assets, Summaries(()))
+    return index, (lambda rel: (assets / rel).read_bytes()), records
+
+
+def test_an_arch_alias_resolves_as_in_manifest_json(tmp_path):
+    index, fetch, (rec,) = _published(tmp_path, LINUX)
+    got = cat.resolve(index, "demo", "1.0", Platform.from_spec("os=linux,arch=amd64"), NONE, fetch)
+    assert got == rec.entry.asset
+
+
+def test_an_entry_without_a_field_matches_a_query_with_it(tmp_path):
+    index, fetch, (rec,) = _published(tmp_path, Platform.from_spec("os=linux,arch=x86_64"))
+    got = cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch)
+    assert got == rec.entry.asset
+
+
+def test_the_most_specific_entry_wins(tmp_path):
+    generic = Platform.from_spec("os=linux,arch=x86_64")
+    index, fetch, (_, explicit) = _published(tmp_path, generic, LINUX)
+    got = cat.resolve(index, "demo", "1.0", LINUX, NONE, fetch)
+    assert got == explicit.entry.asset
+
+
+def test_a_universal2_mac_build_serves_arm64(tmp_path):
+    index, fetch, (rec,) = _published(tmp_path, Platform.from_spec("os=darwin,arch=universal2,os_version=11.0"))
+    got = cat.resolve(index, "demo", "1.0", Platform.from_spec("os=darwin,arch=arm64"), NONE, fetch)
+    assert got == rec.entry.asset
