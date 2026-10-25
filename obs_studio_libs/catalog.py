@@ -131,10 +131,7 @@ def make_slice(assets: Path, tool: str, version: str, platform: Platform, varian
     release = catalog.release(version)
     if release is None:
         raise ManifestError(f"{tool} {version}: no such release")
-    hits = [p for p in release.platforms if p.platform.matches(platform) and p.variant.matches(variant)]
-    if len(hits) != 1:
-        raise ManifestError(f"{tool} {release.version}: {len(hits)} entries match {platform} {variant}")
-    hit = hits[0]
+    hit = pick_platform(tool, release, platform, variant)
     return EmbeddedSlice(
         tool,
         hit.platform,

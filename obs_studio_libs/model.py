@@ -141,10 +141,6 @@ class Platform:
             raise ManifestError(f"platform {spec!r}: os and arch are required")
         return Platform(**values)
 
-    def matches(self, want: Platform) -> bool:
-        """A field the query leaves empty is a wildcard (the manifest.json resolution rule)."""
-        return all(not w or w == mine for w, mine in zip(_fields(want), _fields(self), strict=True))
-
     def flat(self) -> str:
         """linux-x86_64-glibc2.28, darwin-universal2-11.0, windows-x86_64"""
         parts = [self.os, self.arch]
@@ -178,18 +174,11 @@ class Variant:
     def from_spec(spec: str) -> Variant:
         return Variant(**_parse_spec(spec, Variant.FIELDS))
 
-    def matches(self, want: Variant) -> bool:
-        return all(not w or w == mine for w, mine in zip(_fields(want), _fields(self), strict=True))
-
     def flat(self) -> str:
         return "-".join(x for x in (self.optimization, self.edition, self.flavor) if x)
 
     def to_json(self) -> dict[str, object]:
         return _drop_empty({"optimization": self.optimization, "edition": self.edition, "flavor": self.flavor})
-
-
-def _fields(v: Platform | Variant) -> tuple[str, ...]:
-    return tuple(getattr(v, f) for f in v.FIELDS)
 
 
 def _parse_spec(spec: str, allowed: tuple[str, ...]) -> dict[str, str]:
