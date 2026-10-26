@@ -45,12 +45,18 @@ arch_of() {
         gn_dir=Release_GN_arm64
         distrib_arch=macosarm64
         project_arch=arm64
+        # The hook on this host would also write Debug_GN_arm64.
+        export GN_OUT_CONFIGS=Release_GN_arm64
         ;;
     x86_64)
         automate_arch=--x64-build
         gn_dir=Release_GN_x64
         distrib_arch=macosx64
         project_arch=x86_64
+        # An arm64 Mac only writes Release_GN_arm64 unless this is set.
+        # GN_OUT_CONFIGS stops the hook from recreating the arm64 out directory.
+        export CEF_ENABLE_AMD64=1
+        export GN_OUT_CONFIGS=Release_GN_x64
         ;;
     *)
         usage
@@ -86,8 +92,21 @@ automate() {
 
 bootstrap() {
     export PATH="$WORK/depot_tools:$PATH"
+    # depot_tools/ninja is a wrapper. It finds the real binary only when the
+    # current directory is the Chromium tree, so cmake's `ninja --version`
+    # probe from the CEF distribution fails. Prefer the Mach-O ninja.
+    if [ -x "$WORK/chromium/src/third_party/ninja/ninja" ]; then
+        export PATH="$WORK/chromium/src/third_party/ninja:$PATH"
+    fi
     "$WORK/depot_tools/ensure_bootstrap"
-    command -v ninja >/dev/null
+    ninja_bin="$(command -v ninja)"
+    case "$ninja_bin" in
+    *.py|*/depot_tools/ninja)
+        echo "ninja on PATH is the depot_tools wrapper ($ninja_bin)" >&2
+        exit 1
+        ;;
+    esac
+    "$ninja_bin" --version >/dev/null
 }
 
 case "${1:-}" in

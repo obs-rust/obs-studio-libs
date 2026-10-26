@@ -51,3 +51,8 @@ def test_macos_recipe_pins_codecs_and_the_sandbox_library() -> None:
     assert "--arm64-build" in text
     assert "--x64-build" in text
     assert "--build-target=cefclient" in text
+    # An arm64 Mac's hook writes only Release_GN_arm64 unless this is set,
+    # and GN_OUT_CONFIGS keeps the other arch's out directory from returning.
+    assert "CEF_ENABLE_AMD64=1" in text
+    assert "GN_OUT_CONFIGS=Release_GN_x64" in text
+    assert "GN_OUT_CONFIGS=Release_GN_arm64" in text
