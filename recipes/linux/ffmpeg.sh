@@ -22,9 +22,14 @@ opus() {
     git_src opus https://github.com/xiph/opus.git ddbe48383984d56acd9e1ab6a090c54ca6b735a6
     cmake_build -DOPUS_BUILD_PROGRAMS=OFF -DOPUS_BUILD_TESTING=OFF -DOPUS_ENABLE_FLOAT_API=ON
 }
+# libvpx 1.17.0, ahead of obs-deps' 1.14.1: the older release has public fixes
+# pending (CVE-2026-2447, heap overflow in the VP9 encoder's superframe index,
+# reachable through Custom FFmpeg Output) plus decoder fixes on the alpha-WebM
+# path. The soname moves .so.9 -> .so.12; libavcodec is its only user and is
+# rebuilt against it in this same prefix (obs-rust/obs-studio#1134).
 vpx() {
-    tar_src vpx https://github.com/webmproject/libvpx/archive/v1.14.1.tar.gz \
-        901747254d80a7937c933d03bd7c5d41e8e6c883e0665fadcb172542167c7977
+    tar_src vpx https://github.com/webmproject/libvpx/archive/v1.17.0.tar.gz \
+        1020f184046187baa2985dbde38e0691f49c44088bca7a1842b0236c6081dc0a
     ./configure --prefix="$PREFIX" --enable-shared --disable-static --enable-pic --enable-vp9-highbitdepth \
         --disable-examples --disable-tools --disable-docs --disable-unit-tests
     make -j"$JOBS" && make install
