@@ -5,7 +5,7 @@
     obs-studio-libs ingest <forge-artifact.tar.gz> --tool qt6 --version 6.11.1 --platform ... --out dist
     obs-studio-libs add    dist/*.tar.zst.json --assets <assets-branch checkout> [--replace]
     obs-studio-libs slice  --assets <dir> --tool qt6 --version 6.11.1 --platform os=linux,arch=x86_64 -o slice.json
-    obs-studio-libs fetch  --lock deps.lock.json [--only qt6]
+    obs-studio-libs fetch  --lock deps.lock.json [--only qt6]   # an "optional": true entry is skipped
 
 The catalogs live on the orphan `assets` branch: manifest.json at its root
 (the Index) and <tool>/manifest.json per tool, as in zackees/soldr-toolchain.
@@ -88,8 +88,12 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "fetch":
             lock = parse_lock(args.lock.read_bytes(), str(args.lock))
             chosen = [t for t in lock.tools if not args.only or t.tool in args.only]
-            jobs = [(Pin(t.tool, t.version, t.platform, t.variant, t.sha256), Path(t.install)) for t in chosen]
-            for locked, asset in zip(chosen, install_all(jobs, lock.root), strict=True):
+            for t in chosen:
+                if t.optional:
+                    print(f"skipped {t.tool} {t.version}: optional, the host provides it")
+            pending = [t for t in chosen if not t.optional]
+            jobs = [(Pin(t.tool, t.version, t.platform, t.variant, t.sha256), Path(t.install)) for t in pending]
+            for locked, asset in zip(pending, install_all(jobs, lock.root), strict=True):
                 print(f"{asset.filename} -> {locked.install}")
     except ManifestError as e:
         print(f"obs-studio-libs: {e}", file=sys.stderr)
