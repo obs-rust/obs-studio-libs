@@ -1,8 +1,13 @@
-"""fetch: retries with backoff, one root manifest per run, concurrent installs (#3)."""
+"""fetch: retries with backoff, one root manifest per run, concurrent installs (#3).
+
+A lock entry may also say the host provides its tool (`"optional": true`, #2):
+such an entry pins no bytes and `fetch` skips it.
+"""
 
 from __future__ import annotations
 
 import io
+import textwrap
 import threading
 import time
 from pathlib import Path
@@ -10,8 +15,8 @@ from pathlib import Path
 import pytest
 
 from obs_studio_libs import catalog as cat
-from obs_studio_libs import fetch
-from obs_studio_libs.model import ManifestError, Platform, Summaries, Variant
+from obs_studio_libs import cli, fetch
+from obs_studio_libs.model import ManifestError, Platform, Summaries, Variant, parse_lock
 from obs_studio_libs.pack import pack
 
 LINUX = Platform.from_spec("os=linux,arch=x86_64,libc=glibc,os_version=2.28")
@@ -101,3 +106,64 @@ def test_downloads_overlap(tmp_path, monkeypatch, no_sleep):
     start = time.monotonic()
     fetch.install_all([(p, tmp_path / p.tool) for p in pins], ROOT)
     assert time.monotonic() - start < 1.0  # three 0.5 s downloads: about max, not sum (1.5 s)
+
+
+# --- a tool the host provides (#2) -------------------------------------------
+
+SHA = "0" * 64  # what an ordinary entry pins; a host-provided one pins no bytes
+
+
+def lock_text(sha256: str, install: str) -> str:
+    """One ordinary pin plus one the host provides (no sha256, no install path)."""
+    return textwrap.dedent(
+        f"""
+        {{
+          "root": "{ROOT}",
+          "tools": [
+            {{
+              "tool": "alpha",
+              "version": "1.0",
+              "platform": {{"os": "linux", "arch": "x86_64", "libc": "glibc", "os_version": "2.28"}},
+              "variant": {{}},
+              "sha256": "{sha256}",
+              "install": "{install}"
+            }},
+            {{
+              "tool": "beta",
+              "version": "1.0",
+              "platform": {{"os": "linux", "arch": "x86_64", "libc": "glibc", "os_version": "2.28"}},
+              "variant": {{}},
+              "optional": true
+            }}
+          ]
+        }}
+        """
+    )
+
+
+def test_fetch_skips_the_entry_the_host_provides(tmp_path, monkeypatch, capsys):
+    """RED (#2): "optional": true means fetch installs the rest and never requests that tool."""
+    assets, dist, pins = published(tmp_path)
+    opener = FakeOpener(assets, dist)
+    monkeypatch.setattr(fetch, "_OPENER", opener)
+    lock = tmp_path / "deps.lock.json"
+    lock.write_text(lock_text(pins[0].sha256, str(tmp_path / "alpha-out")))
+
+    assert cli.main(["fetch", "--lock", str(lock)]) == 0
+
+    assert (tmp_path / "alpha-out" / "lib" / "alpha.txt").read_text() == "alpha"
+    assert not (tmp_path / "beta-out").exists()
+    assert not any("beta" in url for url in opener.calls)
+    assert "beta" in capsys.readouterr().out
+
+
+def test_a_host_provided_entry_is_marked_and_carries_no_bytes():
+    parsed = parse_lock(lock_text(SHA, "/opt/obs-deps/alpha").encode())
+    ordinary, provided = parsed.tools
+    assert not ordinary.optional and ordinary.sha256 == SHA and ordinary.install == "/opt/obs-deps/alpha"
+    assert provided.optional and provided.sha256 == "" and provided.install == ""
+
+
+def test_an_entry_without_the_flag_still_needs_its_bytes_and_install_path():
+    with pytest.raises(ManifestError, match="sha256"):
+        parse_lock(lock_text("", "/opt/obs-deps/alpha").encode())

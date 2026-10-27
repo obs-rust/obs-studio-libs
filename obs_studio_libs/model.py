@@ -74,6 +74,14 @@ class _Obj:
             raise ManifestError(f"{self._path}.{key}: expected a list of strings")
         return tuple(v)
 
+    def flag(self, key: str, required: bool = True) -> bool:
+        v = self._take(key, required)
+        if v is None:
+            return False
+        if not isinstance(v, bool):
+            raise ManifestError(f"{self._path}.{key}: expected a boolean")
+        return v
+
     def obj(self, key: str, required: bool = True) -> _Obj:
         v = self._take(key, required)
         return _Obj({} if v is None else v, f"{self._path}.{key}")
@@ -445,14 +453,19 @@ class PackRecord:
 
 @dataclass(frozen=True)
 class LockedTool:
-    """One dependency a consumer pins: which build, for which platform, with which bytes, installed where."""
+    """One dependency a consumer pins: which build, for which platform, with which bytes, installed where.
+
+    `optional` marks a tool the host itself provides (a distro's own Qt or FFmpeg at a
+    suitable version, #2): fetch skips it, so the entry pins no bytes and no install path.
+    """
 
     tool: str
     version: str
     platform: Platform
     variant: Variant
-    sha256: str
-    install: str
+    sha256: str = ""
+    install: str = ""
+    optional: bool = False
 
     @staticmethod
     def parse(o: _Obj) -> LockedTool:
@@ -461,10 +474,16 @@ class LockedTool:
             o.str("version"),
             Platform.parse(o.obj("platform")),
             Variant.parse(o.obj("variant", False)),
-            o.str("sha256"),
-            o.str("install"),
+            o.str("sha256", False),
+            o.str("install", False),
+            o.flag("optional", False),
         )
         o.done()
+        if not t.optional:
+            if not t.sha256:
+                raise ManifestError(f"{o._path}.sha256: missing")
+            if not t.install:
+                raise ManifestError(f"{o._path}.install: missing")
         return t
 
 
