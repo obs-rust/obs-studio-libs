@@ -23,6 +23,16 @@
       "summary": "Brotli 1.2.1 (google/brotli): the shared codec libraries libcurl decodes with; the AlmaLinux 8 base's 1.0.6 is inside CVE-2026-111497's range.",
       "kind_hint": "library"
     },
+    "curl": {
+      "descriptor": {
+        "url": "curl/manifest.json",
+        "sha256": "cf0fdd42a6bf0183f2bc5dc93e64306b481cc9fa3f8c4996b9292f5fb3626db4",
+        "size_bytes": 1167,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "curl 8.23.0 (curl/curl): the pinned libcurl the AppImage loads (base has 7.61.1, EOL), built --with-ca-fallback against the pinned brotli 1.2.1.",
+      "kind_hint": "library"
+    },
     "fdk-aac": {
       "descriptor": {
         "url": "fdk-aac/manifest.json",
@@ -98,6 +108,16 @@
         "size_bytes": 1299,
         "media_type": "application/vnd.manifest.v1+json"
       },
+      "kind_hint": "library"
+    },
+    "openssl": {
+      "descriptor": {
+        "url": "openssl/manifest.json",
+        "sha256": "e187edde09b994359a564f8850c8ad4bec5262153f96ed012a4bf514703c9bc6",
+        "size_bytes": 1177,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "OpenSSL 3.5.9 (LTS): the TLS runtime of the pinned libcurl; curl 8.18+ requires OpenSSL >= 3.0, so the base's EOL 1.1.1k cannot back it.",
       "kind_hint": "library"
     },
     "pipewire": {
