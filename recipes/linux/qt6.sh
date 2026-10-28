@@ -30,6 +30,9 @@ fetch() {
 }
 
 fetch qtbase
+# GSSAPI/SPNEGO is unused by OBS (it makes no Negotiate/SPNEGO request), and the
+# base's krb5 libraries it pulls in NEED libcrypto.so.1.1, which re-introduced
+# EOL OpenSSL 1.1.1k into the AppImage (obs-rust/obs-studio#2815).
 cmake -S "qtbase-everywhere-src-$QT_VERSION" -B build-qtbase -G Ninja \
     -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
     -DBUILD_SHARED_LIBS=ON -DQT_BUILD_EXAMPLES=OFF -DQT_BUILD_TESTS=OFF \
@@ -40,7 +43,7 @@ cmake -S "qtbase-everywhere-src-$QT_VERSION" -B build-qtbase -G Ninja \
     -DFEATURE_harfbuzz=ON -DFEATURE_system_harfbuzz=OFF \
     -DFEATURE_system_zlib=ON -DFEATURE_system_png=OFF -DFEATURE_system_jpeg=OFF \
     -DFEATURE_system_pcre2=OFF -DFEATURE_icu=OFF \
-    -DFEATURE_openssl=ON -DFEATURE_openssl_linked=OFF \
+    -DFEATURE_openssl=ON -DFEATURE_openssl_linked=OFF -DFEATURE_gssapi=OFF \
     -DFEATURE_sql=OFF -DFEATURE_testlib=OFF -DFEATURE_printsupport=OFF \
     -DFEATURE_concurrent=OFF -DFEATURE_vulkan=OFF \
     -DFEATURE_eglfs=OFF -DFEATURE_linuxfb=OFF -DFEATURE_vnc=OFF -DFEATURE_gtk3=OFF
