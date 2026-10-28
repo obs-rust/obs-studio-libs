@@ -11,7 +11,7 @@
   "releases": [
     {
       "version": "0.24.6",
-      "published_at": "2026-10-23T03:01:51Z",
+      "published_at": "2026-10-28T15:09:42Z",
       "platforms": [
         {
           "platform": {
@@ -26,8 +26,8 @@
           "asset": {
             "filename": "libdatachannel-0.24.6-linux-x86_64-glibc2.28-release.tar.zst",
             "media_type": "application/zstd",
-            "size_bytes": 1114167,
-            "sha256": "127e3c613f00b05be6391a902700b97307ff364527439a9ff76cde6cdcd66e7b",
+            "size_bytes": 1114574,
+            "sha256": "98f2536522f69c8e3abe8dfa2564b460f65a056a8c744cb34f91d07627a2f129",
             "urls": [
               "https://github.com/obs-rust/obs-studio-libs/releases/download/libdatachannel-0.24.6/libdatachannel-0.24.6-linux-x86_64-glibc2.28-release.tar.zst"
             ]

@@ -86,7 +86,7 @@
     "libdatachannel": {
       "descriptor": {
         "url": "libdatachannel/manifest.json",
-        "sha256": "76a6912d172e105d4af73c95a72c9dcda4ab6bcd04d0a9ed46f4309e709a6c86",
+        "sha256": "55df305646ac44a6bef13af70acb2067fb5d5cd62d8584493ff82c81a260893a",
         "size_bytes": 1218,
         "media_type": "application/vnd.manifest.v1+json"
       },
