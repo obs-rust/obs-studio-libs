@@ -548,3 +548,117 @@ def pick_platform(tool: str, release: Release, platform: Platform, variant: Vari
     except ResolveError as e:
         raise ManifestError(f"{tool} {release.version}: {platform} {variant}: {e}") from e
     return next(p for p in release.platforms if p.asset.to_json() == got)
+
+
+# --- obs-rust/cef release provenance ------------------------------------------------
+#
+# The published CEF archives are pinned by sha256, so the bytes are verifiable but their
+# origin was not: obs-rust/cef now ships `releases/<tag>.json` per release, and each
+# release tag points at the commit that adds its own file (obs-rust/obs-studio#2674).
+# These values are that document plus the slice of GitHub's release API the drift gate in
+# tests/test_cef_release_provenance.py compares it against. A CEF manifest carries more
+# than these fields on purpose (free-text source notes, gaps), so it is read leniently.
+
+
+@dataclass(frozen=True)
+class CefReleaseAsset:
+    name: str
+    sha256: str
+
+
+@dataclass(frozen=True)
+class CefReleaseManifest:
+    tag: str
+    assets: tuple[CefReleaseAsset, ...]
+    patch_commit: str | None
+    has_patch_commit_key: bool
+
+
+@dataclass(frozen=True)
+class GithubReleaseAsset:
+    name: str
+    digest: str
+
+
+@dataclass(frozen=True)
+class GithubRelease:
+    tag_name: str
+    assets: tuple[GithubReleaseAsset, ...]
+
+
+def _mapping_field(doc: Mapping[str, Any], key: str, where: str) -> Mapping[str, Any]:
+    value = doc.get(key)
+    if not isinstance(value, Mapping):
+        raise ManifestError(f"{where}.{key}: expected an object")
+    return value
+
+
+def _string_field(doc: Mapping[str, Any], key: str, where: str, required: bool = True) -> str:
+    value = doc.get(key)
+    if value is None and not required:
+        return ""
+    if not isinstance(value, str):
+        raise ManifestError(f"{where}.{key}: expected a string")
+    return value
+
+
+def parse_cef_release_manifest(text: str | bytes, where: str = "cef release manifest") -> CefReleaseManifest:
+    """One `releases/<tag>.json` from obs-rust/cef."""
+    doc = _load(text, where)
+    if not isinstance(doc, Mapping):
+        raise ManifestError(f"{where}: expected an object")
+    tag = _string_field(doc, "tag", where)
+    if not tag:
+        raise ManifestError(f"{where}.tag: empty")
+    raw_assets = doc.get("assets")
+    if not isinstance(raw_assets, list):
+        raise ManifestError(f"{where}.assets: expected a list")
+    assets = []
+    for i, raw in enumerate(raw_assets):
+        at = f"{where}.assets[{i}]"
+        if not isinstance(raw, Mapping):
+            raise ManifestError(f"{at}: expected an object")
+        assets.append(CefReleaseAsset(_string_field(raw, "name", at), _string_field(raw, "sha256", at)))
+    patch = doc.get("patch_commit")
+    return CefReleaseManifest(
+        tag,
+        tuple(assets),
+        patch if isinstance(patch, str) else None,
+        "patch_commit" in doc,
+    )
+
+
+def parse_git_ref_target(text: str | bytes, where: str = "git ref") -> str:
+    """The commit sha a tag ref resolves to, out of GitHub's git-ref document."""
+    doc = _load(text, where)
+    if not isinstance(doc, Mapping):
+        raise ManifestError(f"{where}: expected an object")
+    sha = _string_field(_mapping_field(doc, "object", where), "sha", f"{where}.object")
+    if not sha:
+        raise ManifestError(f"{where}.object.sha: empty")
+    return sha
+
+
+def parse_github_releases(text: str | bytes, where: str = "github releases") -> tuple[GithubRelease, ...]:
+    """The `/repos/{owner}/{repo}/releases` response, reduced to tag names and asset digests."""
+    doc = _load(text, where)
+    if not isinstance(doc, list):
+        raise ManifestError(f"{where}: expected a list")
+    releases = []
+    for i, raw in enumerate(doc):
+        at = f"{where}[{i}]"
+        if not isinstance(raw, Mapping):
+            raise ManifestError(f"{at}: expected an object")
+        raw_assets = raw.get("assets")
+        if not isinstance(raw_assets, list):
+            raise ManifestError(f"{at}.assets: expected a list")
+        assets = []
+        for j, asset in enumerate(raw_assets):
+            aat = f"{at}.assets[{j}]"
+            if not isinstance(asset, Mapping):
+                raise ManifestError(f"{aat}: expected an object")
+            name = _string_field(asset, "name", aat)
+            digest = _string_field(asset, "digest", aat, required=False)
+            assets.append(GithubReleaseAsset(name, digest))
+        releases.append(GithubRelease(_string_field(raw, "tag_name", at), tuple(assets)))
+    return tuple(releases)
