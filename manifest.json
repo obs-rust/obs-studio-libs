@@ -143,8 +143,8 @@
     "qt6": {
       "descriptor": {
         "url": "qt6/manifest.json",
-        "sha256": "e808a1b2fb6072e6876e08143f0e4a7e43460594574f75c953f7053409b6f95f",
-        "size_bytes": 3213,
+        "sha256": "74afdf7ad2eda46218bdb909356fc420144eb17b745aca5a8c591c912661788c",
+        "size_bytes": 3955,
         "media_type": "application/vnd.manifest.v1+json"
       },
       "summary": "Qt 6 (qtbase, qtsvg, qtwayland on Linux): shared libraries, headers, CMake packages and plugins for building OBS-Studio-Rust.",

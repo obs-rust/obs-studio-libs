@@ -11,7 +11,7 @@
   "releases": [
     {
       "version": "6.11.1",
-      "published_at": "2026-10-16T04:19:30Z",
+      "published_at": "2026-10-28T17:23:02Z",
       "platforms": [
         {
           "platform": {
@@ -49,6 +49,27 @@
             "sha256": "f0edfc3432bd57058bbb9a2cf18aacceb55a2564b018346778c34eb0e3369dbf",
             "urls": [
               "https://github.com/obs-rust/obs-studio-libs/releases/download/qt6-6.11.1/qt6-6.11.1-linux-x86_64-glibc2.28-release.tar.zst"
+            ]
+          }
+        },
+        {
+          "platform": {
+            "os": "linux",
+            "arch": "x86_64",
+            "os_version": "2.28",
+            "libc": "glibc"
+          },
+          "variant": {
+            "optimization": "release",
+            "flavor": "r1"
+          },
+          "asset": {
+            "filename": "qt6-6.11.1-linux-x86_64-glibc2.28-release-r1.tar.zst",
+            "media_type": "application/zstd",
+            "size_bytes": 22099699,
+            "sha256": "b33d981e0c6ab0877e183e2c8d06d2dbc64dc26f60b88cbd42d3ba96aeca99fc",
+            "urls": [
+              "https://github.com/obs-rust/obs-studio-libs/releases/download/qt6-6.11.1/qt6-6.11.1-linux-x86_64-glibc2.28-release-r1.tar.zst"
             ]
           }
         },
