@@ -9,7 +9,9 @@ cd "$(dirname "$0")/../.."
 [ "$(getconf GNU_LIBC_VERSION)" = "glibc 2.28" ] ||
     { echo "error: $(getconf GNU_LIBC_VERSION), expected exactly glibc 2.28" >&2; exit 1; }
 
-all=(headers qrcodegen fdk-aac glib pipewire ffmpeg qt6 libdatachannel libvpl brotli openssl curl)
+# Order is a dependency order: libdatachannel links the pinned OpenSSL 3, and
+# curl links the pinned brotli and OpenSSL, so those prefixes exist first.
+all=(headers qrcodegen fdk-aac glib pipewire ffmpeg qt6 libvpl brotli openssl libdatachannel curl)
 tools=("$@")
 [ "${#tools[@]}" -gt 0 ] || tools=("${all[@]}")
 
