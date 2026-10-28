@@ -13,6 +13,16 @@
       "summary": "appimagetool (AppImage/appimagetool), the AppImage packer the obs-studio build runs.",
       "kind_hint": "library"
     },
+    "brotli": {
+      "descriptor": {
+        "url": "brotli/manifest.json",
+        "sha256": "ef69ab68201733a9cdb7c382b4b573e793643ed22819f1e481799f88954dfe61",
+        "size_bytes": 1171,
+        "media_type": "application/vnd.manifest.v1+json"
+      },
+      "summary": "Brotli 1.2.1 (google/brotli): the shared codec libraries libcurl decodes with; the AlmaLinux 8 base's 1.0.6 is inside CVE-2026-111497's range.",
+      "kind_hint": "library"
+    },
     "fdk-aac": {
       "descriptor": {
         "url": "fdk-aac/manifest.json",
