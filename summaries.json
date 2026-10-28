@@ -1,11 +1,13 @@
 {
   "appimagetool": "appimagetool (AppImage/appimagetool), the AppImage packer the obs-studio build runs.",
   "brotli": "Brotli 1.2.1 (google/brotli): the shared codec libraries libcurl decodes with; the AlmaLinux 8 base's 1.0.6 is inside CVE-2026-111497's range.",
+  "curl": "curl 8.23.0 (curl/curl): the pinned libcurl the AppImage loads (base has 7.61.1, EOL), built --with-ca-fallback against the pinned brotli 1.2.1.",
   "fdk-aac": "Fraunhofer FDK AAC encoder (obs-libfdk).",
   "ffmpeg": "FFmpeg with the codecs OBS ships (x264, aom, svt-av1, vpx, opus, vorbis, theora, lame, srt, librist, mbedtls, nv-codec headers): shared libraries and headers.",
   "glib": "GLib/GIO, for OBS's PipeWire capture (needs >= 2.76).",
   "headers": "Header-only libraries: nlohmann/json, asio, SIMDe.",
   "implib": "Implib.so (yugr/Implib.so): generates the lazy-loading shims for optional host libraries (#959).",
+  "openssl": "OpenSSL 3.5.9 (LTS): the TLS runtime of the pinned libcurl; curl 8.18+ requires OpenSSL >= 3.0, so the base's EOL 1.1.1k cannot back it.",
   "pipewire": "PipeWire client library, modules, SPA plugins and client.conf.",
   "qrcodegen": "nayuki QR-Code-generator (C++), for obs-websocket.",
   "qt6": "Qt 6 (qtbase, qtsvg, qtwayland on Linux): shared libraries, headers, CMake packages and plugins for building OBS-Studio-Rust.",
