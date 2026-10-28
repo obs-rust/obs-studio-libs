@@ -1,5 +1,6 @@
 {
   "appimagetool": "appimagetool (AppImage/appimagetool), the AppImage packer the obs-studio build runs.",
+  "brotli": "Brotli 1.2.1 (google/brotli): the shared codec libraries libcurl decodes with; the AlmaLinux 8 base's 1.0.6 is inside CVE-2026-111497's range.",
   "fdk-aac": "Fraunhofer FDK AAC encoder (obs-libfdk).",
   "ffmpeg": "FFmpeg with the codecs OBS ships (x264, aom, svt-av1, vpx, opus, vorbis, theora, lame, srt, librist, mbedtls, nv-codec headers): shared libraries and headers.",
   "glib": "GLib/GIO, for OBS's PipeWire capture (needs >= 2.76).",
