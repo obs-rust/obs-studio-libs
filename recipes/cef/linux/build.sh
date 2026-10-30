@@ -94,7 +94,14 @@ build_deps() {
 case "${1:-}" in
 sync)
     arch_of "${2:-}"
-    automate --no-build --no-distrib
+    # Anything after the architecture goes to automate-git.py, so a CEF branch
+    # that moved its Chromium tag (CHROMIUM_BUILD_COMPATIBILITY.txt) can be
+    # re-synced: --no-chromium-history refuses a tree at the old tag and needs
+    # --force-update, which re-clones chromium/src (build_deps then reinstalls
+    # the sysroot under the new tree).
+    extra=()
+    if [ "$#" -gt 2 ]; then extra=("${@:3}"); fi
+    automate --no-build --no-distrib "${extra[@]}"
     build_deps
     ;;
 build)

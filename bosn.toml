@@ -64,6 +64,10 @@ cmd = "recipes/cef/linux/build.sh sync arm64"
 stack = "cef-linux"
 cmd = "recipes/cef/linux/build.sh build arm64"
 
+[task.cef-linux-sync-arm64-force]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh sync arm64 --force-update"
+
 [task.cef-linux-pack-arm64]
 stack = "cef-linux"
 cmd = "recipes/cef/linux/build.sh pack arm64"
