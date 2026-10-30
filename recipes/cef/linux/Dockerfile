@@ -1,4 +1,5 @@
-# Build environment for CEF on os=linux,arch=x86_64 (obs-rust/obs-studio#1864).
+# Build environment for CEF on os=linux, arch=x86_64 natively and arm64 as a
+# cross build from that same x86_64 image (obs-rust/obs-studio#1864, #3062).
 # Chromium's build wants a Debian/Ubuntu host; the result links against
 # Chromium's own Debian sysroot (use_sysroot=true), not this image's glibc, so
 # the host does not set the artifact's glibc floor (measured by pack). The
