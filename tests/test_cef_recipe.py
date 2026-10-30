@@ -56,3 +56,23 @@ def test_macos_recipe_pins_codecs_and_the_sandbox_library() -> None:
     assert "CEF_ENABLE_AMD64=1" in text
     assert "GN_OUT_CONFIGS=Release_GN_x64" in text
     assert "GN_OUT_CONFIGS=Release_GN_arm64" in text
+
+
+def test_linux_recipe_builds_arm64() -> None:
+    """The arm64 archive is the same recipe with `target_cpu="arm64"`.
+
+    obs-rust/obs-studio#3062: ubuntu-aarch64 still pins CEF 7871, so the nightly
+    version guard fails on it. The Linux recipe used to hardcode the x86_64
+    automated build, the x64 out directory and the `linux64` distribution, so
+    nothing but x86_64 could be produced; x86_64 stays the default argument.
+    """
+    text = BUILD.read_text()
+    assert "--x64-build" in text
+    assert "--arm64-build" in text
+    # The host is x86_64, so an arm64 run must ask GN for arm64 explicitly.
+    assert 'target_cpu=\\"arm64\\"' in text or "target_cpu=" in text
+    assert "Release_GN_arm64" in text
+    assert "linuxarm64" in text
+    # obs-studio's pin (ci/test_cef_pin.py) names the archive _linux_aarch64.
+    assert "aarch64" in text
+    assert "cef_binary_${VERSION}_linux_${asset_arch}" in text
