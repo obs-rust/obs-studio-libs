@@ -13,6 +13,7 @@ from pathlib import Path
 
 BUILD = Path(__file__).resolve().parents[1] / "recipes" / "cef" / "linux" / "build.sh"
 MAC = Path(__file__).resolve().parents[1] / "recipes" / "cef" / "macos" / "build.sh"
+BOSN = Path(__file__).resolve().parents[1] / "bosn.toml"
 
 # The Linux 8078 archive (obs-rust/cef release 8078) was built from this commit.
 MAC_CHECKOUT = "426920c33ef22551e0b8f48cf343d623ac25642d"
@@ -76,3 +77,37 @@ def test_linux_recipe_builds_arm64() -> None:
     # obs-studio's pin (ci/test_cef_pin.py) names the archive _linux_aarch64.
     assert "aarch64" in text
     assert "cef_binary_${VERSION}_linux_${asset_arch}" in text
+
+
+def test_linux_arm64_recipe_installs_the_arm64_sysroot() -> None:
+    """CEF only generates an arm64 configuration when its sysroot exists.
+
+    `cef/tools/gn_args.py` skips a cpu whose
+    `build/linux/debian_bullseye_<cpu>-sysroot` directory is missing, and the
+    gclient hook only installs the sysroot of the architecture it synced, so an
+    arm64 build from this x86_64 host died in automate with
+    `Path does not exist: out/Release_GN_arm64/args.gn`
+    (obs-rust/obs-studio#3062). build_deps must install it for arm64.
+    """
+    text = BUILD.read_text()
+    assert 'if [ "$arch" = arm64 ]' in text
+    assert "sysroot_scripts/install-sysroot.py" in text
+    assert "--arch=arm64" in text
+
+
+def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
+    """`bosn run --task` passes no arguments, so arm64 needs its own tasks.
+
+    The recipe's architecture is a positional argument (`build.sh build arm64`),
+    and bosn executes a task's `cmd` exactly as written (bosn.toml's header
+    documents the three steps). Without an arm64 task the only reachable build
+    is the x86_64 default, so the archive obs-studio pins for ubuntu-aarch64
+    cannot be produced at all (obs-rust/obs-studio#3062).
+    """
+    manifest = BOSN.read_text()
+    for step in ("sync", "build", "pack"):
+        header = f"[task.cef-linux-{step}-arm64]"
+        assert header in manifest, step
+        block = manifest.split(header, 1)[1].split("[task.", 1)[0]
+        assert 'stack = "cef-linux"' in block, step
+        assert f'cmd = "recipes/cef/linux/build.sh {step} arm64"' in block, block

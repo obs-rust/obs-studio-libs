@@ -50,3 +50,20 @@ cmd = "recipes/cef/linux/build.sh build"
 [task.cef-linux-pack]
 stack = "cef-linux"
 cmd = "recipes/cef/linux/build.sh pack"
+
+# The arm64 half of obs-rust/obs-studio#3062. `bosn run --task` passes no
+# arguments, and the architecture is a positional argument of build.sh, so
+# arm64 needs its own tasks; sync/build resume in the same out/cef checkout
+# and only the out directory (Release_GN_arm64) and the distribution
+# (linuxarm64) differ. Pack makes cef_binary_8078_linux_aarch64.tar.xz.
+[task.cef-linux-sync-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh sync arm64"
+
+[task.cef-linux-build-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh build arm64"
+
+[task.cef-linux-pack-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/linux/build.sh pack arm64"
