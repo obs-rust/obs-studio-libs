@@ -9,10 +9,12 @@ at a fraction of full debug info (obs-rust/obs-studio#2363).
 from __future__ import annotations
 
 import re
+import tomllib
 from pathlib import Path
 
 BUILD = Path(__file__).resolve().parents[1] / "recipes" / "cef" / "linux" / "build.sh"
 MAC = Path(__file__).resolve().parents[1] / "recipes" / "cef" / "macos" / "build.sh"
+BOSN = Path(__file__).resolve().parents[1] / "bosn.toml"
 
 # The Linux 8078 archive (obs-rust/cef release 8078) was built from this commit.
 MAC_CHECKOUT = "426920c33ef22551e0b8f48cf343d623ac25642d"
@@ -76,3 +78,20 @@ def test_linux_recipe_builds_arm64() -> None:
     # obs-studio's pin (ci/test_cef_pin.py) names the archive _linux_aarch64.
     assert "aarch64" in text
     assert "cef_binary_${VERSION}_linux_${asset_arch}" in text
+
+
+def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
+    """`bosn run --task` passes no arguments, so arm64 needs its own tasks.
+
+    The recipe's architecture is a positional argument (`build.sh build arm64`),
+    and bosn executes a task's `cmd` exactly as written (bosn.toml's header
+    documents the three steps). Without an arm64 task the only reachable build
+    is the x86_64 default, so the archive obs-studio pins for ubuntu-aarch64
+    cannot be produced at all (obs-rust/obs-studio#3062).
+    """
+    manifest = tomllib.loads(BOSN.read_text())
+    tasks = manifest["task"]
+    for step in ("sync", "build", "pack"):
+        task = tasks[f"cef-linux-{step}-arm64"]
+        assert task["stack"] == "cef-linux", step
+        assert task["cmd"].endswith(f"build.sh {step} arm64"), task["cmd"]
