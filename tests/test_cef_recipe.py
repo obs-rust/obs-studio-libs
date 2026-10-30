@@ -79,6 +79,22 @@ def test_linux_recipe_builds_arm64() -> None:
     assert "cef_binary_${VERSION}_linux_${asset_arch}" in text
 
 
+def test_linux_arm64_recipe_installs_the_arm64_sysroot() -> None:
+    """CEF only generates an arm64 configuration when its sysroot exists.
+
+    `cef/tools/gn_args.py` skips a cpu whose
+    `build/linux/debian_bullseye_<cpu>-sysroot` directory is missing, and the
+    gclient hook only installs the sysroot of the architecture it synced, so an
+    arm64 build from this x86_64 host died in automate with
+    `Path does not exist: out/Release_GN_arm64/args.gn`
+    (obs-rust/obs-studio#3062). build_deps must install it for arm64.
+    """
+    text = BUILD.read_text()
+    assert 'if [ "$arch" = arm64 ]' in text
+    assert "sysroot_scripts/install-sysroot.py" in text
+    assert "--arch=arm64" in text
+
+
 def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
     """`bosn run --task` passes no arguments, so arm64 needs its own tasks.
 
