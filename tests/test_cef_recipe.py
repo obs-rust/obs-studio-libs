@@ -95,6 +95,24 @@ def test_linux_arm64_recipe_installs_the_arm64_sysroot() -> None:
     assert "--arch=arm64" in text
 
 
+def test_sync_forwards_automate_flags_and_has_a_refresh_task() -> None:
+    """A CEF branch that moves its Chromium tag needs a forced re-sync.
+
+    8078's CHROMIUM_BUILD_COMPATIBILITY.txt moved from 156.0.8078.48 to
+    .80 between two runs; with --no-chromium-history automate refuses the tree
+    at the old tag and asks for --force-update. sync forwards everything after
+    the architecture so that flag is reachable from a bosn task, and
+    build_deps reinstalls the sysroot under the re-cloned tree.
+    """
+    text = BUILD.read_text()
+    assert 'automate --no-build --no-distrib "${extra[@]}"' in text
+    manifest = BOSN.read_text()
+    header = "[task.cef-linux-sync-arm64-force]"
+    assert header in manifest
+    block = manifest.split(header, 1)[1].split("[task.", 1)[0]
+    assert 'cmd = "recipes/cef/linux/build.sh sync arm64 --force-update"' in block, block
+
+
 def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
     """`bosn run --task` passes no arguments, so arm64 needs its own tasks.
 
