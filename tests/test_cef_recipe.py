@@ -9,7 +9,6 @@ at a fraction of full debug info (obs-rust/obs-studio#2363).
 from __future__ import annotations
 
 import re
-import tomllib
 from pathlib import Path
 
 BUILD = Path(__file__).resolve().parents[1] / "recipes" / "cef" / "linux" / "build.sh"
@@ -89,9 +88,10 @@ def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
     is the x86_64 default, so the archive obs-studio pins for ubuntu-aarch64
     cannot be produced at all (obs-rust/obs-studio#3062).
     """
-    manifest = tomllib.loads(BOSN.read_text())
-    tasks = manifest["task"]
+    manifest = BOSN.read_text()
     for step in ("sync", "build", "pack"):
-        task = tasks[f"cef-linux-{step}-arm64"]
-        assert task["stack"] == "cef-linux", step
-        assert task["cmd"].endswith(f"build.sh {step} arm64"), task["cmd"]
+        header = f"[task.cef-linux-{step}-arm64]"
+        assert header in manifest, step
+        block = manifest.split(header, 1)[1].split("[task.", 1)[0]
+        assert 'stack = "cef-linux"' in block, step
+        assert f'cmd = "recipes/cef/linux/build.sh {step} arm64"' in block, block
