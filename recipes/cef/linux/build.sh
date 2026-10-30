@@ -81,6 +81,14 @@ build_deps() {
     # from the depot_tools sysroot hook, for the target_cpu in args.gn.
     "$WORK/chromium/src/build/install-build-deps.sh" --no-prompt --no-chromeos-fonts \
         --no-arm --no-nacl --no-backwards-compatible >/dev/null
+    # The gclient hook installs only the sysroot of the architecture it synced,
+    # so an arm64 build from this x86_64 host has no arm64 sysroot and
+    # cef/tools/gn_args.py silently skips the arm64 configuration ("Not
+    # generating arm64 configuration due to missing sysroot directory");
+    # automate then fails reading out/Release_GN_arm64/args.gn.
+    if [ "$arch" = arm64 ]; then
+        python3 "$WORK/chromium/src/build/linux/sysroot_scripts/install-sysroot.py" --arch=arm64
+    fi
 }
 
 case "${1:-}" in
