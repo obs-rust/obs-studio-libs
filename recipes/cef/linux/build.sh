@@ -101,6 +101,16 @@ sync)
     # the sysroot under the new tree).
     extra=()
     if [ "$#" -gt 2 ]; then extra=("${@:3}"); fi
+    # --force-update is the request for a fresh Chromium checkout, but
+    # automate-git.py reads the existing tree's version (chrome/VERSION) before
+    # it honours the flag, so a sync killed mid-clone leaves a tree that the
+    # next forced sync dies on with `Path does not exist: .../chrome/VERSION`
+    # instead of re-cloning it. Clear that incomplete tree here.
+    if [ -d "$WORK/chromium/src" ] && [ ! -f "$WORK/chromium/src/chrome/VERSION" ] &&
+        [[ " ${extra[*]-} " == *" --force-update "* ]]; then
+        echo "removing incomplete Chromium checkout under $WORK/chromium" >&2
+        rm -rf "${WORK:?}/chromium"
+    fi
     automate --no-build --no-distrib "${extra[@]}"
     build_deps
     ;;

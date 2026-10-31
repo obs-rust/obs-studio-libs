@@ -113,6 +113,28 @@ def test_sync_forwards_automate_flags_and_has_a_refresh_task() -> None:
     assert 'cmd = "recipes/cef/linux/build.sh sync arm64 --force-update"' in block, block
 
 
+def test_sync_replaces_a_checkout_left_without_chrome_version() -> None:
+    """A sync killed mid-checkout leaves chromium/src without chrome/VERSION.
+
+    automate-git.py checks the existing tree's version before it honours
+    --force-update, so the next forced sync died with `Path does not exist:
+    .../chromium/src/chrome/VERSION` instead of re-cloning it (a real tick on
+    obs-rust/obs-studio#3062). The sync step removes that incomplete tree
+    itself, and only when --force-update asked for a fresh checkout.
+    """
+    text = BUILD.read_text()
+    guard = re.search(
+        r'if \[ -d "\$WORK/chromium/src" \] && \[ ! -f "\$WORK/chromium/src/chrome/VERSION" \].*?\n[ \t]*fi\n',
+        text,
+        re.S,
+    )
+    assert guard, "sync must clear a chromium checkout left without chrome/VERSION"
+    block = guard[0]
+    assert "--force-update" in block
+    assert 'rm -rf "${WORK:?}/chromium"' in block
+    assert text.index(block) < text.index("automate --no-build --no-distrib")
+
+
 def test_bosn_tasks_can_run_the_arm64_recipe() -> None:
     """`bosn run --task` passes no arguments, so arm64 needs its own tasks.
 
