@@ -71,3 +71,38 @@ cmd = "recipes/cef/linux/build.sh sync arm64 --force-update"
 [task.cef-linux-pack-arm64]
 stack = "cef-linux"
 cmd = "recipes/cef/linux/build.sh pack arm64"
+
+# The Windows half of obs-rust/obs-studio#1864 / #2417: a Linux -> Windows
+# cross build on the same checkout. automate can sync but has no target-OS
+# switch on branch 8078, so `toolchain` packages soldr's xwin payload as the
+# depot_tools win_toolchain zip and `build` calls GN with target_os="win".
+# Pack makes cef_binary_8078_windows_{x64,arm64}.zip. The two architectures
+# write different out directories and distributions, so each needs its own
+# tasks.
+[task.cef-win-sync]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh sync"
+
+[task.cef-win-toolchain]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh toolchain"
+
+[task.cef-win-build]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh build"
+
+[task.cef-win-pack]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh pack"
+
+[task.cef-win-sync-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh sync arm64"
+
+[task.cef-win-build-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh build arm64"
+
+[task.cef-win-pack-arm64]
+stack = "cef-linux"
+cmd = "recipes/cef/windows/build.sh pack arm64"
