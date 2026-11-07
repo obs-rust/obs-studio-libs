@@ -68,3 +68,14 @@ Published bytes are immutable, as in soldr-toolchain: `add` refuses an asset
 whose filename is already catalogued with another sha256 (`--replace` is the
 deliberate override), and a rebuild of a published version is packed with
 `--label` and published beside the original.
+
+The dispatch-only **Linux tools** workflow (`.github/workflows/linux.yml`) builds
+FFmpeg in the same pinned manylinux 2.28 image as `bosn run --task linux`, with
+`/src` and `/opt/obs-deps` mounted the same way. Select `tool=ffmpeg`, a matching
+`version`, the recipe `ref` (prefer a full commit), and an optional rebuild
+`label` such as `r7-ci`. It uploads the usual `.tar.zst`, its pack record and
+`provenance.txt` as a workflow artifact. The archive contains the install prefix,
+not an enclosing `ffmpeg/` directory. The packer enforces the glibc 2.28 floor.
+This initial producer does not publish releases or update the `assets` catalog;
+compare its output with the existing release before publishing or moving a
+consumer. Use a fresh label for a rebuild; never replace published bytes.

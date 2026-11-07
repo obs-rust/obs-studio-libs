@@ -1,0 +1,73 @@
+name: Linux tools
+run-name: Linux ${{ inputs.tool }} ${{ inputs.version }} ${{ inputs.label }}
+# Artifact-only validation producer. Publication/catalog updates remain manual;
+# this workflow has no write token and never publishes from a PR.
+on:
+  workflow_dispatch:
+    inputs:
+      tool:
+        description: Linux recipe to build (FFmpeg only initially)
+        type: choice
+        options: [ffmpeg]
+        default: ffmpeg
+        required: true
+      version:
+        description: Version (must match VERSION in the selected recipe)
+        default: 8.1.3
+        required: true
+      ref:
+        description: obs-studio-libs recipe commit or ref (resolved SHA is recorded)
+        default: main
+        required: true
+      label:
+        description: Optional rebuild label, e.g. r7-ci (published bytes stay immutable)
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: linux-${{ inputs.tool }}-${{ inputs.version }}-${{ inputs.label }}
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - name: Checkout producer
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Checkout selected recipe
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.ref }}
+          path: source
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      - name: Test producer tooling
+        run: |
+          uv run --group dev pytest
+          uv run --group dev ruff check .
+      - name: Build and pack
+        env:
+          TOOL: ${{ inputs.tool }}
+          VERSION: ${{ inputs.version }}
+          LABEL: ${{ inputs.label }}
+        run: bash recipes/linux/ci-build.sh build "$TOOL" "$VERSION" "$LABEL" source
+      - name: Record provenance
+        env:
+          RECIPE_REF: ${{ inputs.ref }}
+        run: |
+          {
+            printf 'producer_commit=%s\n' "$(git rev-parse HEAD)"
+            printf 'recipe_ref=%s\nrecipe_commit=%s\n' "$RECIPE_REF" "$(git -C source rev-parse HEAD)"
+            printf 'run=%s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+            sha256sum source/recipes/linux/{Dockerfile,ffmpeg.sh,common.sh} dist/*.tar.zst
+          } > dist/provenance.txt
+          cat dist/provenance.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload archive, pack record and provenance
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: linux-${{ inputs.tool }}-${{ inputs.version }}${{ inputs.label && format('-{0}', inputs.label) || '' }}
+          path: dist/
+          if-no-files-found: error
