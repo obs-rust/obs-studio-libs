@@ -39,6 +39,16 @@ def test_qt_still_keeps_the_tls_client_it_needs() -> None:
     assert "-DFEATURE_openssl_linked=OFF" in flags
 
 
+def test_qtbase_builds_qttest() -> None:
+    flags = cmake_flags()
+    # obs-studio's Qt Frontend Linux job builds its Qt-linked cmocka tests
+    # against this prefix; the ones that use QTest are not built without it
+    # (obs-rust/obs-studio#4837). The AppImage takes only the libraries OBS
+    # links, so QtTest does not ship with it.
+    assert "-DFEATURE_testlib=ON" in flags
+    assert "-DFEATURE_testlib=OFF" not in flags
+
+
 def test_build_sh_builds_qt6() -> None:
     match = re.search(r"^all=\((.*)\)$", BUILD.read_text(), re.M)
     assert match, "build.sh must list the default tools"
