@@ -1,11 +1,14 @@
 name: Qt 6
-run-name: Qt ${{ inputs.qt_version }} for Windows and macOS
+run-name: Qt ${{ inputs.qt_version }} (${{ inputs.platforms }}) ${{ inputs.label }}
 # Builds Qt with obs-deps' own recipe and build action (deps.qt/, the
-# build-qt action) on the Windows and macOS runners, repacks each platform's
-# result as <tool>-<version>-<platform>.tar.zst (zstd 9, `obs-studio-libs pack`),
-# attaches it to the release qt6-<version>, and records it in qt6/manifest.json
-# and the root manifest.json on the assets branch. Linux (glibc 2.28) is built by obs-studio's
-# build-aux/appimage/manylinux/ image and published with the same script.
+# build-qt action) on the Windows and macOS runners, and Linux (glibc 2.28)
+# with recipes/linux/qt6.sh in the manylinux image (recipes/linux/ci-build.sh,
+# as linux.yml builds FFmpeg; obs-rust/obs-studio#4837). Repacks each
+# platform's result as <tool>-<version>-<platform>.tar.zst (zstd 9,
+# `obs-studio-libs pack`), attaches it to the release qt6-<version>, and
+# records it in qt6/manifest.json and the root manifest.json on the assets
+# branch. A rebuild of a published platform needs a label: published bytes are
+# immutable, and the upload refuses an existing name.
 on:
   workflow_dispatch:
     inputs:
@@ -17,6 +20,15 @@ on:
         description: obs-rust/obs-deps commit whose deps.qt recipe to build
         required: true
         default: fc89a353445a59c735276489082e6d11f446c6e1
+      platforms:
+        description: Platforms to build and publish
+        type: choice
+        options: [all, linux, windows-macos]
+        default: all
+        required: true
+      label:
+        description: Optional build label for every asset of this run, e.g. testlib (required to rebuild a published platform)
+        required: false
 permissions:
   contents: read
 concurrency:
@@ -25,6 +37,7 @@ concurrency:
 jobs:
   build:
     name: Qt ${{ inputs.qt_version }} (${{ matrix.name }})
+    if: inputs.platforms != 'linux'
     runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
@@ -92,6 +105,7 @@ jobs:
           PLATFORM: ${{ matrix.platform }}
           VARIANT: ${{ matrix.variant }}
           QT_VERSION: ${{ inputs.qt_version }}
+          LABEL: ${{ inputs.label }}
         run: |
           shopt -s nullglob
           # obs-deps also writes a debug-symbol archive (...-dSYMs.tar.xz on macOS) beside the package.
@@ -106,7 +120,7 @@ jobs:
           *.tar.xz) tar -xJf "${files[0]}" -C stage ;;
           esac
           uv run --project libs obs-studio-libs pack stage --tool qt6 --version "$QT_VERSION" \
-            --platform "$PLATFORM" --variant "$VARIANT" --out dist
+            --platform "$PLATFORM" --variant "$VARIANT" --label "$LABEL" --out dist
       - name: Upload
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -114,9 +128,41 @@ jobs:
           path: dist/
           if-no-files-found: error
 
+  build-linux:
+    name: Qt ${{ inputs.qt_version }} (linux-x86_64)
+    if: inputs.platforms != 'windows-macos'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+      - name: Build and pack
+        env:
+          QT_VERSION: ${{ inputs.qt_version }}
+          LABEL: ${{ inputs.label }}
+        run: bash recipes/linux/ci-build.sh build qt6 "$QT_VERSION" "$LABEL" .
+      - name: Record provenance
+        run: |
+          {
+            printf 'commit=%s\n' "$(git rev-parse HEAD)"
+            printf 'run=%s/%s/actions/runs/%s\n' "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID"
+            sha256sum recipes/linux/{Dockerfile,qt6.sh,common.sh} dist/*.tar.zst
+          } > dist/provenance-linux.txt
+          cat dist/provenance-linux.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: qt6-linux-x86_64
+          path: dist/
+          if-no-files-found: error
+
   publish:
     name: Publish
-    needs: build
+    needs: [build, build-linux]
+    # One of the build jobs is skipped when only some platforms are built.
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -137,6 +183,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           QT_VERSION: ${{ inputs.qt_version }}
+          PLATFORMS: ${{ inputs.platforms }}
+          LABEL: ${{ inputs.label }}
         run: |
           tag="qt6-${QT_VERSION}"
           gh release view "$tag" >/dev/null 2>&1 ||
@@ -151,5 +199,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add manifest.json */manifest.json
-          git commit -m "qt6 ${QT_VERSION}: Windows and macOS assets"
+          git commit -m "qt6 ${QT_VERSION}: ${PLATFORMS} assets${LABEL:+ ($LABEL)}"
           git push origin HEAD:assets
