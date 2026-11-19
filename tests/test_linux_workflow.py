@@ -18,6 +18,8 @@ SCRIPT = ROOT / "recipes/linux/ci-build.sh"
         ("../ffmpeg", "8.1.3", "r7-ci", False),
         ("curl", "8.1.3", "r7-ci", False),
         ("ffmpeg", "8.1.3", "../bad", False),
+        ("qt6", "6.11.1", "testlib", True),
+        ("qt6", "6.11.0", "testlib", False),
     ],
 )
 def test_dispatch_validation(tool, version, label, ok):
@@ -39,3 +41,15 @@ def test_dispatch_is_artifact_only():
     assert "contents: write" not in workflow
     assert "gh release" not in workflow
     assert "actions/upload-artifact@" in workflow
+
+
+def test_qt6_workflow_builds_and_publishes_linux():
+    """The Linux Qt asset is built and published by qt6.yml like the Windows
+    and macOS ones, not by hand (obs-rust/obs-studio#4837)."""
+    workflow = (ROOT / ".github/workflows/qt6.yml").read_text()
+    assert "bash recipes/linux/ci-build.sh build qt6" in workflow
+    assert "needs: [build, build-linux]" in workflow
+    # A rebuild of one platform gets a label; published bytes stay immutable.
+    assert "label:" in workflow
+    assert "platforms:" in workflow
+    assert "--clobber" not in workflow.replace("Never --clobber", "")

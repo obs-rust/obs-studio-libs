@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 # Qt 6 for the glibc 2.28 AppImage base (obs-rust/obs-studio#926): qtbase
-# (Core, Gui, Widgets, Network, OpenGL, DBus, Xml, the xcb QPA plugin), qtsvg
+# (Core, Gui, Widgets, Network, OpenGL, DBus, Xml, Test, the xcb QPA plugin), qtsvg
 # and qtwayland (WaylandClient, wl-shell integration), installed into /opt/obs-deps/qt6.
 # These are the Qt libraries the Ubuntu 26.04 AppImage bundled, at the version
-# obs-deps (deps.qt/qt6.zsh) ships for Windows and macOS.
+# obs-deps (deps.qt/qt6.zsh) ships for Windows and macOS. Test (QtTest) is for
+# obs-studio's Qt-linked unit tests (obs-rust/obs-studio#4837); the AppImage
+# bundles only the libraries OBS links, so it does not carry QtTest.
 set -euo pipefail
 [ "$(getconf GNU_LIBC_VERSION)" = "glibc 2.28" ] ||
     { echo "error: $(getconf GNU_LIBC_VERSION), expected exactly glibc 2.28 (recipes/linux/Dockerfile)" >&2; exit 1; }
@@ -44,7 +46,7 @@ cmake -S "qtbase-everywhere-src-$QT_VERSION" -B build-qtbase -G Ninja \
     -DFEATURE_system_zlib=ON -DFEATURE_system_png=OFF -DFEATURE_system_jpeg=OFF \
     -DFEATURE_system_pcre2=OFF -DFEATURE_icu=OFF \
     -DFEATURE_openssl=ON -DFEATURE_openssl_linked=OFF -DFEATURE_gssapi=OFF \
-    -DFEATURE_sql=OFF -DFEATURE_testlib=OFF -DFEATURE_printsupport=OFF \
+    -DFEATURE_sql=OFF -DFEATURE_testlib=ON -DFEATURE_printsupport=OFF \
     -DFEATURE_concurrent=OFF -DFEATURE_vulkan=OFF \
     -DFEATURE_eglfs=OFF -DFEATURE_linuxfb=OFF -DFEATURE_vnc=OFF -DFEATURE_gtk3=OFF
 cmake --build build-qtbase
